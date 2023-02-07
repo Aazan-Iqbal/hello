@@ -1,3 +1,3 @@
-module github.com/aazaniqbal/hello
+module github.com/Aazan-Iqbal/hello
 
 go 1.19

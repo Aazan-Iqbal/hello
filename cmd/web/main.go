@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/aazaniqbal/hello/handlers"
+	"github.com/Aazan-Iqbal/hello/handlers"
 )
 
 func main() {

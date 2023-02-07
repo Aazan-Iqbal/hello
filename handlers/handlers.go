@@ -1,15 +1,14 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
-	"time"
-	
+
+	"github.com/Aazan-Iqbal/hello/helpers"
 )
 
 // greeting function handler
 func Greeting(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Welcome to My Page!"))
+
 }
 
 // homepage function handler
@@ -18,14 +17,14 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
+	helpers.RenderTemplates(w, "./static/html/home.page.tmpl")
 
-	w.Write([]byte("Wassaaaap"))
 }
 
 // about page function handler
 func About(w http.ResponseWriter, r *http.Request) {
-	day := time.Now().Weekday()
-	w.Write([]byte(fmt.Sprintf("Have a good %s.", day)))
+	// day := time.Now().Weekday()
+
 }
 
 func MessageCreate(w http.ResponseWriter, r *http.Request) {
@@ -37,5 +36,4 @@ func MessageCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte("message created...."))
 }
