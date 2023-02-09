@@ -3,29 +3,34 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
-
-	"github.com/Aazan-Iqbal/hello/handlers"
 )
+
+// Create a new type
+type application struct{}
 
 func main() {
 
-	// create a multiplexer
-	// Used to store which handlers to call when a page requests an endpoint
-	mux := http.NewServeMux()
+	// creating a flag for specifying the port number when starting the server
+	addr := flag.String("port", ":4000", "HTTP network address")
+	flag.Parse()
 
-	fileServer := http.FileServer(http.Dir("./static/"))
-	mux.Handle("/static", http.StripPrefix("/static", fileServer))
+	// Create an instance of the application type
+	app := &application{}
 
-	mux.HandleFunc("/greeting", handlers.Greeting)
-	mux.HandleFunc("/", handlers.Home)
-	mux.HandleFunc("/about", handlers.About)
-	mux.HandleFunc("/message/create", handlers.MessageCreate)
+	//get the routes
+
+	//Create a customized server
+	srv := &http.Server{
+		Addr:    *addr,
+		Handler: app.routes(),
+	}
 
 	// create our server
-	log.Println("Starting server on port :4000") // print to show an attempt was made to start the server
-	err := http.ListenAndServe(":4000", mux)     // start the server in port 4000 and pass any errors to "err"
+	log.Printf("Starting server on port %s", *addr) // print to show an attempt was made to start the server
+	err := srv.ListenAndServe()                     // start the server in port 4000 and pass any errors to "err"
 
 	log.Fatal(err) // should not be reached. Prints out errors if the server did not start properly
 
