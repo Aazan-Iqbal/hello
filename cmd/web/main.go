@@ -8,22 +8,38 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"os"
 	"time"
+
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 // Create a new type
+// Dependency Injection(DI):
+// It is a way to neatly expose data to all the handlers. Acts as a centralized repository for
+// all handlers to access data
 type application struct{}
 
 func main() {
 
 	// creating a flag for specifying the port number when starting the server
 	addr := flag.String("port", ":4000", "HTTP network address")
+	//grab our environment variable for our database from the .profile using the os package to interact with the OS.
+	// We also add a help message for when an invalid dsn is passed
+	dsn := flag.String("dsn", os.Getenv("RCSYSTEM_DB_DSN"), "PostgreSQL DSN")
 	flag.Parse()
+
+	// create an instance of a connection pool)(ie make a connection to the database)
+	db, err := openDB(*dsn)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 
 	// Create an instance of the application type
 	app := &application{}
-
-	//get the routes
+	defer db.Close()
+	log.Println("Database connection pool establish.")
 
 	//Create a customized server
 	srv := &http.Server{
@@ -33,7 +49,7 @@ func main() {
 
 	// create our server
 	log.Printf("Starting server on port %s", *addr) // print to show an attempt was made to start the server
-	err := srv.ListenAndServe()                     // start the server in port 4000 and pass any errors to "err"
+	err = srv.ListenAndServe()                      // start the server in port 4000 and pass any errors to "err"
 
 	log.Fatal(err) // should not be reached. Prints out errors if the server did not start properly
 

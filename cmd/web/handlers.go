@@ -27,6 +27,7 @@ func (app *application) About(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// message create function handler
 func (app *application) MessageCreate(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		w.Header().Set("Allow", "POST")
