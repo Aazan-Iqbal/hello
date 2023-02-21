@@ -1,19 +1,25 @@
 package main
 
-import "net/http"
+import (
+	"net/http"
 
-func (app *application) routes() *http.ServeMux {
+	"github.com/julienschmidt/httprouter"
+)
+
+func (app *application) routes() http.Handler {
 
 	// create a multiplexer
 	// Used to store which handlers to call when a page requests an endpoint
-	mux := http.NewServeMux()
+	router := httprouter.New()
 
+	//create a file server
 	fileServer := http.FileServer(http.Dir("./static/"))
-	mux.Handle("/static", http.StripPrefix("/static", fileServer))
+	router.Handler(http.MethodGet, "/static/*filepath", http.StripPrefix("/static", fileServer))
 
-	mux.HandleFunc("/greeting", app.Greeting)
-	mux.HandleFunc("/", app.Home)
-	mux.HandleFunc("/about", app.About)
-	mux.HandleFunc("/message/create", app.MessageCreate)
-	return mux
+	router.HandlerFunc(http.MethodGet, "/create", app.Greeting)
+	router.HandlerFunc(http.MethodGet, "/", app.Home)
+	router.HandlerFunc(http.MethodGet, "/about", app.About)
+	router.HandlerFunc(http.MethodPost, "/create", app.MessageCreate)
+
+	return router
 }

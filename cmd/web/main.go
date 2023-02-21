@@ -3,9 +3,12 @@
 package main
 
 import (
+	"context"
+	"database/sql"
 	"flag"
 	"log"
 	"net/http"
+	"time"
 )
 
 // Create a new type
@@ -34,4 +37,22 @@ func main() {
 
 	log.Fatal(err) // should not be reached. Prints out errors if the server did not start properly
 
+}
+
+// Get a database connection pool
+func openDB(dsn string) (*sql.DB, error) {
+	db, err := sql.Open("pgx", dsn)
+	if err != nil {
+		return nil, err
+	}
+	// use a context to check if the DB is reachable
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	// let's ping the DB
+	err = db.PingContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return db, nil
 }
