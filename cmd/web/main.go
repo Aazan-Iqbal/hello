@@ -29,7 +29,7 @@ func main() {
 	dsn := flag.String("dsn", os.Getenv("RCSYSTEM_DB_DSN"), "PostgreSQL DSN")
 	flag.Parse()
 
-	// create an instance of a connection pool)(ie make a connection to the database)
+	// create an instance of a connection pool(Pool of many reusable connections to the DB)
 	db, err := openDB(*dsn)
 	if err != nil {
 		log.Println(err)
