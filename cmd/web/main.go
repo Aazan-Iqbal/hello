@@ -11,6 +11,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/Aazan-Iqbal/hello/internal/models"
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
@@ -18,7 +19,9 @@ import (
 // Dependency Injection(DI):
 // It is a way to neatly expose data to all the handlers. Acts as a centralized repository for
 // all handlers to access data
-type application struct{}
+type application struct {
+	question models.QuestionModel
+}
 
 func main() {
 
@@ -37,9 +40,11 @@ func main() {
 	}
 
 	// Create an instance of the application type
-	app := &application{}
+	app := &application{
+		question: models.QuestionModel{DB: db},
+	}
 	defer db.Close()
-	log.Println("Database connection pool establish.")
+	log.Println("Database connection pool established.")
 
 	//Create a customized server
 	srv := &http.Server{
@@ -61,9 +66,11 @@ func openDB(dsn string) (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	// use a context to check if the DB is reachable
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
+
 	// let's ping the DB
 	err = db.PingContext(ctx)
 	if err != nil {
