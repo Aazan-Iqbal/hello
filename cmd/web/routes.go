@@ -1,3 +1,4 @@
+// Filename: cmd/web/routes.go
 package main
 
 import (
@@ -6,21 +7,20 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-//router function that initializes our router to create a handler
-func (app *application) routes() http.Handler {
-
-	// create a multiplexer
-	// Used to store which handlers to call when a page requests an endpoint
+func(app *application) routes() *httprouter.Router {
 	router := httprouter.New()
-
-	//create a file server - to store and serve static content
-	fileServer := http.FileServer(http.Dir("./static/"))
-	router.Handler(http.MethodGet, "/static/*filepath", http.StripPrefix("/static", fileServer))
-
-	router.HandlerFunc(http.MethodGet, "/create", app.Greeting)
-	router.HandlerFunc(http.MethodGet, "/", app.Home)
-	router.HandlerFunc(http.MethodGet, "/about", app.About)
-	router.HandlerFunc(http.MethodPost, "/create", app.MessageCreate)
-
+	fileServer := http.FileServer(http.Dir("./ui/static/"))
+	// ROUTES: 10
+  router.Handler(http.MethodGet,"/static/*filepath", http.StripPrefix("/static", fileServer))
+	router.HandlerFunc(http.MethodGet,"/", app.home)
+	router.HandlerFunc(http.MethodGet, "/about", app.about)
+	router.HandlerFunc(http.MethodGet,"/poll/reply", app.pollReplyShow)
+	router.HandlerFunc(http.MethodPost, "/poll/reply", app.pollReplySubmit)
+	router.HandlerFunc(http.MethodGet, "/poll/success", app.pollSuccessShow)
+	router.HandlerFunc(http.MethodGet, "/poll/create", app.pollCreateShow)
+	router.HandlerFunc(http.MethodPost, "/poll/create", app.pollCreateSubmit)
+	router.HandlerFunc(http.MethodGet, "/options/create", app.optionsCreateShow)
+	router.HandlerFunc(http.MethodPost, "/options/create", app.optionsCreateSubmit)
+	
 	return router
 }

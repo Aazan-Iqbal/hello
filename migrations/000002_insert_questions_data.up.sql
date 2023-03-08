@@ -1,3 +1,4 @@
+-- Filename: migrations/000002_insert_questions_data.up.sql
 INSERT INTO questions(body)
 VALUES 
 ('How are you doing today?'),

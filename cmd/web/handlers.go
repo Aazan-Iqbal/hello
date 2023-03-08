@@ -2,45 +2,88 @@ package main
 
 import (
 	"net/http"
-
-	"github.com/Aazan-Iqbal/hello/helpers"
+	"strconv"
 )
 
-// greeting function handler
-func (app *application) Greeting(w http.ResponseWriter, r *http.Request) {
-	question, err := app.question.Get()
+func (app *application) home(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, "home.page.tmpl", nil)
+}
+
+func (app *application) about(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, "about.page.tmpl", nil)
+
+}
+
+func (app *application) pollReplyShow(w http.ResponseWriter, r *http.Request) {
+	question, err := app.questions.Get()
 	if err != nil {
-		return
+	    return
 	}
-
-	w.Write([]byte(question.Body))
-
+	data := &templateData{
+	    Question: question,
+	}
+	RenderTemplate(w, "poll.page.tmpl", data)
 }
 
-// homepage function handler
-func (app *application) Home(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		http.NotFound(w, r)
+func (app *application) pollReplySubmit(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, "bad request", http.StatusBadRequest)
 		return
 	}
-	helpers.RenderTemplates(w, "./static/html/home.page.tmpl")
-
+	response := r.PostForm.Get("emotion")
+	question_id := r.PostForm.Get("id")
+	identifier, err := strconv.ParseInt(question_id, 10, 64)
+	if err != nil {
+		return 
+	}
+	_, err = app.responses.Insert(response, identifier)
+	if err != nil {
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+	    return
+	}
 }
 
-// about page function handler
-func (app *application) About(w http.ResponseWriter, r *http.Request) {
-	// day := time.Now().Weekday()
-
+func (app *application) pollSuccessShow(w http.ResponseWriter, r *http.Request) {
+	return
 }
 
-// message create function handler
-func (app *application) MessageCreate(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		w.Header().Set("Allow", "POST")
-		// w.WriteHeader(405)
-		// w.Write([]byte("Method not allowed"))
-		http.Error(w, "Method not Allowed", http.StatusMethodNotAllowed)
+func (app *application) pollCreateShow(w http.ResponseWriter, r *http.Request) {
+	// display the input box
+	RenderTemplate(w, "poll.create.page.tmpl", nil)
+}
+
+func (app *application) pollCreateSubmit(w http.ResponseWriter, r *http.Request) {
+	// add the question to the datastore
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, "bad request", http.StatusBadRequest)
 		return
 	}
+	question := r.PostForm.Get("new_question")
+	_, err = app.questions.Insert(question)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+}
 
+func (app *application) optionsCreateShow(w http.ResponseWriter, r *http.Request) {
+	RenderTemplate(w, "options.create.page.tmpl", nil)
+}
+
+func (app *application) optionsCreateSubmit(w http.ResponseWriter, r *http.Request) {
+	// get the four options
+	r.ParseForm()
+	option_1 := r.PostForm.Get("option_1")
+	option_2 := r.PostForm.Get("option_2")
+	option_3 := r.PostForm.Get("option_3")
+	option_4 := r.PostForm.Get("option_4")
+	// save the options
+	_, err := app.options.Insert(option_1, option_2, option_3, option_4)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+	}
 }

@@ -1,5 +1,3 @@
-// Filename: hello.go
-
 package main
 
 import (
@@ -11,71 +9,65 @@ import (
 	"os"
 	"time"
 
-	"github.com/Aazan-Iqbal/hello/internal/models"
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/lewisdalwin/poll/internal/models"
 )
 
-// Create a new type
-// Dependency Injection(DI):
-// It is a way to neatly expose data to all the handlers. Acts as a centralized repository for
-// all handlers to access data
+// Share data across our handlers
 type application struct {
-	question models.QuestionModel
+	questions models.QuestionModel
+	responses models.ResponseModel
+	options models.OptionsModel
 }
 
 func main() {
-
-	// creating a flag for specifying the port number when starting the server
-	addr := flag.String("port", ":4000", "HTTP network address")
-	//grab our environment variable for our database from the .profile using the os package to interact with the OS.
-	// We also add a help message for when an invalid dsn is passed
-	dsn := flag.String("dsn", os.Getenv("RCSYSTEM_DB_DSN"), "PostgreSQL DSN")
+	// configure our server
+	addr := flag.String("addr", ":4000", "HTTP network address")
+	dsn := flag.String("dsn", os.Getenv("POLL_DB_DSN"), "PostgreSQL DSN (Data Source Name)")
 	flag.Parse()
 
-	// create an instance of a connection pool(Pool of many reusable connections to the DB)
+	// get a database connection pool
 	db, err := openDB(*dsn)
 	if err != nil {
-		log.Println(err)
+		log.Print(err)
 		return
 	}
 
-	// Create an instance of the application type
+	// share data across our handlers
 	app := &application{
-		question: models.QuestionModel{DB: db},
+		questions: models.QuestionModel{DB: db},
+		responses: models.ResponseModel{DB: db},
+		options: models.OptionsModel{DB: db},
 	}
+	// cleanup the connection pool
 	defer db.Close()
-	log.Println("Database connection pool established.")
-
-	//Create a customized server
+	// acquired a database connection pool
+	log.Println("database connection pool established")
+	// create and start a custom web server
+	log.Printf("starting server on %s", *addr)
 	srv := &http.Server{
-		Addr:    *addr,
-		Handler: app.routes(),
+		Addr:         *addr,
+		Handler:      app.routes(),
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
-
-	// create our server
-	log.Printf("Starting server on port %s", *addr) // print to show an attempt was made to start the server
-	err = srv.ListenAndServe()                      // start the server in port 4000 and pass any errors to "err"
-
-	log.Fatal(err) // should not be reached. Prints out errors if the server did not start properly
-
+	err = srv.ListenAndServe()
+	log.Fatal(err)
 }
-
-// Get a database connection pool
+// The openDB() function returns a database connection pool or error
 func openDB(dsn string) (*sql.DB, error) {
 	db, err := sql.Open("pgx", dsn)
 	if err != nil {
 		return nil, err
 	}
-
-	// use a context to check if the DB is reachable
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	// create a context 
+	ctx, cancel := context.WithTimeout(context.Background(), 5 * time.Second)
 	defer cancel()
-
-	// let's ping the DB
+	// test the DB connection
 	err = db.PingContext(ctx)
 	if err != nil {
 		return nil, err
 	}
-
 	return db, nil
 }
