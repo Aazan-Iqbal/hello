@@ -9,21 +9,21 @@ import (
 	"os"
 	"time"
 
+	"github.com/Aazan-Iqbal/hello/internal/models"
 	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/lewisdalwin/poll/internal/models"
 )
 
 // Share data across our handlers
 type application struct {
 	questions models.QuestionModel
 	responses models.ResponseModel
-	options models.OptionsModel
+	options   models.OptionsModel
 }
 
 func main() {
 	// configure our server
 	addr := flag.String("addr", ":4000", "HTTP network address")
-	dsn := flag.String("dsn", os.Getenv("POLL_DB_DSN"), "PostgreSQL DSN (Data Source Name)")
+	dsn := flag.String("dsn", os.Getenv("RCSYSTEM_DB_DSN"), "PostgreSQL DSN")
 	flag.Parse()
 
 	// get a database connection pool
@@ -37,7 +37,7 @@ func main() {
 	app := &application{
 		questions: models.QuestionModel{DB: db},
 		responses: models.ResponseModel{DB: db},
-		options: models.OptionsModel{DB: db},
+		options:   models.OptionsModel{DB: db},
 	}
 	// cleanup the connection pool
 	defer db.Close()
@@ -55,14 +55,15 @@ func main() {
 	err = srv.ListenAndServe()
 	log.Fatal(err)
 }
+
 // The openDB() function returns a database connection pool or error
 func openDB(dsn string) (*sql.DB, error) {
 	db, err := sql.Open("pgx", dsn)
 	if err != nil {
 		return nil, err
 	}
-	// create a context 
-	ctx, cancel := context.WithTimeout(context.Background(), 5 * time.Second)
+	// create a context
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	// test the DB connection
 	err = db.PingContext(ctx)

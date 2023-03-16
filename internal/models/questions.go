@@ -33,7 +33,7 @@ func (m *QuestionModel) Insert(body string) (int64, error) {
 	            `
 	ctx, cancel := context.WithTimeout(context.Background(), 3 * time.Second)
 	defer cancel()
-	err := m.DB.QueryRowContext(ctx, statement, body).Scan(&id)
+	err := m.DB.QueryRowContext(ctx, statement, body).Scan(&id)  // QueryRowcontext worries about the time Queryflow doesnt scan is used to store he in the variable 'id'
 	if err != nil {
 		return 0, err
 	}

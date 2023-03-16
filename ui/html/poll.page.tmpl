@@ -2,7 +2,7 @@
 {{define "content"}}
 <div>
   <div>
-    <h1>{{.Question.Body}}</h1>
+     <h1>{{.Question.Body}}</h1>  <!--"." is a placeholder for a value -->
   </div>
   <form action="/poll/reply" method="POST">
     <div>
@@ -27,7 +27,7 @@
         id="question_id"
         name="id"
         value="{{.Question.QuestionID}}"
-      />
+     />  <!--   Above was done to be able to get access to the data struct -->
     </div>
   </form>
 </div>

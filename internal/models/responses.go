@@ -9,11 +9,12 @@ import (
 
 // The Question model will represent a single question in our questions table
 type Response struct {
-	ResponseID int64
-	QuestonID int64
+	ResponseID   int64
+	QuestonID    int64
 	ResponseCode int64
-	CreatedAt time.Time
+	CreatedAt    time.Time
 }
+
 // The QuestionModel type will encapsulate the
 // DB connection pool that will be initialized
 // in the main() function
@@ -24,13 +25,14 @@ type ResponseModel struct {
 // The Insert() function stores a question into the questions table
 func (m *ResponseModel) Insert(response string, question_id int64) (int64, error) {
 	var id int64
-	statement := 
-	            `
+	statement :=
+		`
 							INSERT INTO question_responses(question_id, response_code_id)
 							VALUES($1, (SELECT response_code_id FROM response_codes WHERE code =  $2))
 							RETURNING question_id
 	            `
-	ctx, cancel := context.WithTimeout(context.Background(), 3 * time.Second)
+		// select represents looking for the phrase inputted so that we get the 'id'
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	err := m.DB.QueryRowContext(ctx, statement, question_id, response).Scan(&id)
 	if err != nil {
@@ -42,7 +44,7 @@ func (m *ResponseModel) Insert(response string, question_id int64) (int64, error
 // func (m *QuestionModel) Get() (*Question, error) {
 // 	var q Question
 
-// 	statement := 
+// 	statement :=
 // 	            `
 // 							SELECT question_id, body
 // 							FROM questions

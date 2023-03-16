@@ -17,12 +17,13 @@ func (app *application) about(w http.ResponseWriter, r *http.Request) {
 func (app *application) pollReplyShow(w http.ResponseWriter, r *http.Request) {
 	question, err := app.questions.Get()
 	if err != nil {
-	    return
+		return
 	}
-	data := &templateData{
-	    Question: question,
+	data := &templateData{ // This is the reference to data.go
+		Question: question,
 	}
-	RenderTemplate(w, "poll.page.tmpl", data)
+	RenderTemplate(w, "poll.page.tmpl", data) //cannot pass more than one peice of data to our execute function
+	// so we created a type to hold all peices of our data
 }
 
 func (app *application) pollReplySubmit(w http.ResponseWriter, r *http.Request) {
@@ -35,14 +36,14 @@ func (app *application) pollReplySubmit(w http.ResponseWriter, r *http.Request) 
 	question_id := r.PostForm.Get("id")
 	identifier, err := strconv.ParseInt(question_id, 10, 64)
 	if err != nil {
-		return 
+		return
 	}
 	_, err = app.responses.Insert(response, identifier)
 	if err != nil {
 		http.Error(w,
 			http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
-	    return
+		return
 	}
 }
 
@@ -62,7 +63,7 @@ func (app *application) pollCreateSubmit(w http.ResponseWriter, r *http.Request)
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
 	}
-	question := r.PostForm.Get("new_question")
+	question := r.PostForm.Get("new_question") // Refers to the name
 	_, err = app.questions.Insert(question)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
