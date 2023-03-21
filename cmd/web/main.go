@@ -15,6 +15,8 @@ import (
 
 // Share data across our handlers
 type application struct {
+	errorLog  *log.Logger
+	infoLog   *log.Logger
 	questions models.QuestionModel
 	responses models.ResponseModel
 	options   models.OptionsModel
@@ -33,8 +35,14 @@ func main() {
 		return
 	}
 
+	//create instances of errorLog and infolog
+	infoLog := log.New(os.Stdout, "INFO/t", log.Ldate|log.Ltime)
+	errorLog := log.New(os.Stderr, "ERROR/t", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// share data across our handlers
 	app := &application{
+		errorLog:  errorLog,
+		infoLog:   infoLog,
 		questions: models.QuestionModel{DB: db},
 		responses: models.ResponseModel{DB: db},
 		options:   models.OptionsModel{DB: db},
@@ -42,11 +50,12 @@ func main() {
 	// cleanup the connection pool
 	defer db.Close()
 	// acquired a database connection pool
-	log.Println("database connection pool established")
+	infoLog.Println("database connection pool established")
 	// create and start a custom web server
-	log.Printf("starting server on %s", *addr)
+	infoLog.Printf("starting server on %s", *addr)
 	srv := &http.Server{
 		Addr:         *addr,
+		ErrorLog:     errorLog,
 		Handler:      app.routes(),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  5 * time.Second,

@@ -6,7 +6,8 @@ import (
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, "home.page.tmpl", nil)
+	panic("peepee poopoo")
+	// RenderTemplate(w, "home.page.tmpl", nil)
 }
 
 func (app *application) about(w http.ResponseWriter, r *http.Request) {

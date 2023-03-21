@@ -24,5 +24,7 @@ func (app *application) routes() http.Handler {
 
 	//returns the router to our middleware before it hits the server and goes to a client to check the
 	// contents and append things to the contents or block them if necessary.
-	return SecurityHeadersMiddleware(router)
+	return app.recoverPanicMiddleware(
+		app.logRequestMiddleware(
+			SecurityHeadersMiddleware(router)))
 }
