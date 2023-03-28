@@ -24,6 +24,10 @@
     }}
   </head>
   <body>
+    {{ with .Flash }}
+    <div class="flash"> {{.}} </div>
+    {{end}}
+
     {{block "content" .}}
 
     {{ end }}

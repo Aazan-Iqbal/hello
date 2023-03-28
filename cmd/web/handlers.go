@@ -48,11 +48,18 @@ func (app *application) pollReplySubmit(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// do a redirect
+	app.sessionManager.Put(r.Context(), "flash", "Poll submitted successfully!")
 	http.Redirect(w, r, "/poll/success", http.StatusSeeOther)
 }
 
 func (app *application) pollSuccessShow(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, "success.page.tmpl", nil)
+	// remove the entry from the session manager
+	flash := app.sessionManager.PopString(r.Context(), "flash")
+	data := &templateData{
+		Flash: flash,
+	}
+
+	RenderTemplate(w, "success.page.tmpl", data)
 }
 
 func (app *application) pollCreateShow(w http.ResponseWriter, r *http.Request) {

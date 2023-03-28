@@ -7,4 +7,5 @@ import (
 
 type templateData struct {
 	Question *models.Question
+	Flash    string
 }
