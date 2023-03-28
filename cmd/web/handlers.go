@@ -6,8 +6,8 @@ import (
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
-	panic("peepee poopoo")
-	// RenderTemplate(w, "home.page.tmpl", nil)
+	// panic("oh no")
+	RenderTemplate(w, "home.page.tmpl", nil)
 }
 
 func (app *application) about(w http.ResponseWriter, r *http.Request) {
@@ -46,10 +46,13 @@ func (app *application) pollReplySubmit(w http.ResponseWriter, r *http.Request) 
 			http.StatusInternalServerError)
 		return
 	}
+
+	// do a redirect
+	http.Redirect(w, r, "/poll/success", http.StatusSeeOther)
 }
 
 func (app *application) pollSuccessShow(w http.ResponseWriter, r *http.Request) {
-	return
+	RenderTemplate(w, "success.page.tmpl", nil)
 }
 
 func (app *application) pollCreateShow(w http.ResponseWriter, r *http.Request) {

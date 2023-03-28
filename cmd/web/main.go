@@ -10,16 +10,18 @@ import (
 	"time"
 
 	"github.com/Aazan-Iqbal/hello/internal/models"
+	"github.com/alexedwards/scs/v2"
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 // Share data across our handlers
 type application struct {
-	errorLog  *log.Logger
-	infoLog   *log.Logger
-	questions models.QuestionModel
-	responses models.ResponseModel
-	options   models.OptionsModel
+	errorLog       *log.Logger
+	infoLog        *log.Logger
+	questions      models.QuestionModel
+	responses      models.ResponseModel
+	options        models.OptionsModel
+	sessionManager *scs.SessionManager
 }
 
 func main() {
@@ -38,14 +40,21 @@ func main() {
 	//create instances of errorLog and infolog
 	infoLog := log.New(os.Stdout, "INFO/t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stderr, "ERROR/t", log.Ldate|log.Ltime|log.Lshortfile)
+	// setup a new session manager
+	sessionManager := scs.New()
+	sessionManager.Lifetime = 1 * time.Hour
+	sessionManager.Cookie.Persist = true
+	sessionManager.Cookie.Secure = false
+	sessionManager.Cookie.SameSite = http.SameSiteLaxMode
 
 	// share data across our handlers
 	app := &application{
-		errorLog:  errorLog,
-		infoLog:   infoLog,
-		questions: models.QuestionModel{DB: db},
-		responses: models.ResponseModel{DB: db},
-		options:   models.OptionsModel{DB: db},
+		errorLog:       errorLog,
+		infoLog:        infoLog,
+		questions:      models.QuestionModel{DB: db},
+		responses:      models.ResponseModel{DB: db},
+		options:        models.OptionsModel{DB: db},
+		sessionManager: sessionManager,
 	}
 	// cleanup the connection pool
 	defer db.Close()

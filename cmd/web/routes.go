@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
+	"github.com/justinas/alice"
 )
 
 func (app *application) routes() http.Handler {
@@ -22,9 +23,14 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodGet, "/options/create", app.optionsCreateShow)
 	router.HandlerFunc(http.MethodPost, "/options/create", app.optionsCreateSubmit)
 
+	// tidy up middleware chain
+	// ones at the bottom/left are more deeply nested than the ones on the top/right
+	standardMiddleware := alice.New(app.recoverPanicMiddleware,
+		app.logRequestMiddleware,
+		SecurityHeadersMiddleware,
+	)
+
 	//returns the router to our middleware before it hits the server and goes to a client to check the
 	// contents and append things to the contents or block them if necessary.
-	return app.recoverPanicMiddleware(
-		app.logRequestMiddleware(
-			SecurityHeadersMiddleware(router)))
+	return standardMiddleware.Then(router)
 }

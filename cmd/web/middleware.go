@@ -38,7 +38,7 @@ func (app *application) recoverPanicMiddleware(next http.Handler) http.Handler {
 			defer func() {
 				if err := recover(); err != nil {
 					w.Header().Set("connection", "closed")
-					trace := fmt.Sprintf("%s \n", debug.Stack())
+					trace := fmt.Sprintf("%s \n%s", err, debug.Stack())
 					app.errorLog.Output(2, trace)
 					http.Error(w, http.StatusText(http.StatusInternalServerError),
 						http.StatusInternalServerError)
